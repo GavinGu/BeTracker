@@ -119,7 +119,7 @@
 
 % Do not change the page size or page settings.
 \begin{abstract}
-Monitoring the bicycle safety is of great importance. The current methods either require specific hardware supports or are expensive. In this paper, we propose \sysname, a smartphone-based system to track bicyclist movements and alarm their dangerous riding behaviors in real time. Preliminary experiments over 15 days show that the overall detection accuracy of \sysname on riding behavior achieves 94.6\%,  satisfying the practical operation in daily usage.                   
+Monitoring the bicycle safety is of great importance. The current methods either require specific hardware supports or are expensive. In this paper, we propose \sysname, a smartphone-based system to track bicyclist movements and alarm their dangerous riding behaviors in real time. Preliminary experiments over 12 participants show that the overall detection accuracy of \sysname on riding behavior achieves 86.8\%,  satisfying the practical operation in daily usage.                   
 \end{abstract}
 %
 %\keywords{\plainkeywords}
@@ -133,7 +133,7 @@ Monitoring the bicycle safety is of great importance. The current methods either
 Bicycle is a worldwide and principal transportation tool due to its efficiency, environment-friendly and cheap. However, the bicycle safety is easily overlooked by many cyclists. According to the recent report, there were 726 cyclists killed and an additional 50,000 injured in motor vehicle traffic crashes in 2014 \cite{bib:Bic2014}.
 Dangerous riding behaviors is one of a main factor of this kind of accident. 
 Specifically, the frequent lane weaving or stand riding is easy for the bike rider to loss balance, and riding a bike against the direction of legal traffic usually causes head-on collision or traffic congestion. 
-Therefore, a real-time, ubiquitous and efficient system to monitor the bicyclist behavior is of great importance. 
+Therefore, a real-time, ubiquitous and efficient system to improve the bicycle safety urgently needed. 
 % what is related work
 
 \begin{marginfigure}[1pc]
@@ -146,7 +146,7 @@ Therefore, a real-time, ubiquitous and efficient system to monitor the bicyclist
 	\end{turn}
 \end{marginfigure}
 
-Improving the bicycle safety is a key issue in human lifetime, and it has been studied by a broad-range of research works. Cyber-Physical bicycle \cite{Bib:imp2010} performs automated rear-approaching vehicle detection via video and audio sensors. LightLane \cite{bib:Lig2014} highlights a bike path around a bicycle on the roadway by projecting an image, reminding the motorists to keep a safe passing distance. However, these works require professional hardware supports.  BikeNet \cite{Bib:Bik2009} constructs a mobile sensing platform on a bicycle to gather the riding data and the environmental data. \sysname takes one step further of this work,  providing a pervasive and efficient system to monitor the bicyclist riding behaviors with smartphones. It evokes the embedded accelerometers and gyrometers of smartphones to monitor the cyclists' movements and employs the GPS to track their riding directions, which infers the two common and dangerous riding actions (\ie the frequent lane weaving and standing riding) and detects the wrong-way riding.  
+ A broad-range of research works has been studied on this point. Cyber-Physical bicycle \cite{Bib:imp2010} performs automated rear-approaching vehicle detection via video and audio sensors. LightLane \cite{bib:Lig2014} highlights a bike path around a bicycle on the roadway by projecting an image, reminding the motorists to keep a safe passing distance. However, these works require professional hardware supports and are often with high cost.  BikeNet \cite{Bib:Bik2009} constructs a mobile sensing platform on a bicycle to gather the riding data and the environmental data. \sysname takes one step further of this work,  providing a pervasive and efficient system to monitor the bicyclist riding behaviors with smartphones. It evokes the embedded accelerometers and gyrometers of smartphones to monitor the cyclists' movements and employs the GPS to track their riding directions, which infers the two common and dangerous riding actions (\ie the frequent lane weaving and standing riding) and detects the wrong-way riding.  
 Compared with previous works, \sysname gets rid of the professional hardware equipments, and provides an real-time alarm when the cyclists run in an illegal bike way. 
 
 The key challenges are from two sides. 1) How to identify discriminative behaviors of the riders from noisy environmental data. 2) How to determine the legal riding directions of cycleways without knowledges.   
@@ -229,7 +229,7 @@ Fig.~\ref{fig:gps_workflow} illustrates the work flow of the wrong-way riding de
 \end{figure}
 
 Afterwards, \sysname delivers the GPS traces to the server and match it with the GPS trajectories in the server by Dynamic Time Warping (DTW). If matched, \sysname determines the cyclist's current position and then compares his/her riding direction with the legal direction of the cycleway.  \sysname computes a cyclist's riding direction by partitioning his GPS trajectory into disjointed segments. Assuming a GPS segment with a start co-ordinate ($X_{1}$, $Y_{1}$) and a end co-ordinate ($X_{2}$, $Y_{2}$), the riding direction $\tau$ of the cyclist is computed as $\tau=arctan(\frac{Y_{2}-Y_{1}}{X_{2}-X_{1}})$.  The two red arrows in Fig.~\ref{fig:gps_trace} show the legal directions which calculated by the methods above.  
-If unmatched, \sysname regards this GPS trace as a new route candidates in the database. A new route is generated after more than there are three route candidates with less distance than preset threshold. A cycleway is calculated as the centerline of these candidates, and its legal distance is also consistent with the three candidate routes, which is calculated as above.  
+If unmatched, \sysname regards this GPS trace as a new route candidates in the database. A new route is generated after more than there are three route candidates with less Hausdorff distance \cite{bib:Hausdorff1994} than preset threshold $\tau$, which is set as 5m based on our experiment results. A cycleway is calculated as the centerline of these candidates, and its legal distance is also consistent with the three candidate routes, which is calculated as above.  
 %%
 
 
@@ -269,7 +269,7 @@ We test \sysname from the performance of the riding events detection and the per
 \end{marginfigure}
 
 \subsection{Performance of riding event detection}
-Table~\ref{confusion_matrix} shows the  prediction confusion matrix of riding movement: Normal Riding; Stand Riding; Lane Weaving Riding. As shown, the inference accuracy of each riding movement is higher than 80\%, demonstrating the efficiency of our system.     
+Table~\ref{confusion_matrix} shows the  prediction confusion matrix of riding movement: Normal Riding; Stand Riding; Lane Weaving Riding. As shown, the inference accuracy of each riding movement is higher than 80\%, and the overall accuracy achieves 86.8\%, demonstrating the efficiency of our system.     
 
 \begin{table}[h]
 	\centering
@@ -302,9 +302,10 @@ Table~\ref{confusion_matrix} shows the  prediction confusion matrix of riding mo
 	\end{minipage}
 \end{margintable}
 \subsection{Performance of wrong-way riding direction detection}
-Table~\ref{wrong_way_riding} illustrates the performance of wrong-way riding direction detection. 
+We first use the Hausdorff distances to compare the GPS traces generated by our methods with the true GPS traces of cycleways, and find more than 91\% pairwise distance are within 7m, and 98\% computed riding direction are consistent to the legal riding directions.  
+Second,  We  evaluate the  performance of wrong-way riding direction detection, and  Table~\ref{wrong_way_riding} illustrates the results. 
 We compare the user's riding direction with the legal cycling direction of trajectories stored in the database.  
-As shown, the rate of true negative are higher than 90 \%, demonstrating that \sysname can discover most wrong-way riding cases. Meanwhile, less than 15 \% false positive rate shows the legal riding behavior is rarely misclassified as the wrong-way riding.  
+As shown, the rate of true negative are higher than 90\%, demonstrating that \sysname can discover most wrong-way riding cases. Meanwhile, less than 15\% false positive rate shows the legal riding behavior is rarely misclassified as the wrong-way riding.  
 
 %\begin{table}[h]
 %	\centering
