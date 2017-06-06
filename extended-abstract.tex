@@ -12,6 +12,8 @@
 \usepackage{threeparttable}
 \usepackage{rotating}
 \usepackage{multirow}
+\usepackage{colortbl}
+%\usepackage[none]{hyphenat}
 % Some optional stuff you might like/need.
 % \usepackage{marginnote}
 % \usepackage[shortlabels]{enumitem}
@@ -62,7 +64,7 @@
     \affaddr{Authortown, BC V6M 22P Canada}\\
     \email{author5@anotherco.com} } \vfil \alignauthor{%
     \textbf{Zimu Zhou}\\
-    \affaddr{ Computer Engineering and Networks Laboratory}\\
+    \affaddr{ Computer Engineering and Networks Laboratory }\\
     \affaddr{ ETH Zurich}\\
     \email{zzhou@tik.ee.ethz.ch} }\alignauthor{%
     \textbf{Sixth Author}\\
@@ -120,7 +122,7 @@
 Monitoring the bicycle safety is of great importance. The current methods either require specific hardware supports or are expensive. In this paper, we propose \sysname, a smartphone-based system to track bicyclist movements and alarm their dangerous riding behaviors in real time. Preliminary experiments over 15 days show that the overall detection accuracy of \sysname on riding behavior achieves 94.6\%,  satisfying the practical operation in daily usage.                   
 \end{abstract}
 %
-\keywords{\plainkeywords}
+%\keywords{\plainkeywords}
 
 \category{H.5.m}{Information interfaces and presentation (e.g.,
   HCI)}{Miscellaneous}\category{See}{\url{http://acm.org/about/class/1998/}}{for
@@ -134,26 +136,27 @@ Specifically, the frequent lane weaving or stand riding is easy for the bike rid
 Therefore, a real-time, ubiquitous and efficient system to monitor the bicyclist behavior is of great importance. 
 % what is related work
 
+\begin{marginfigure}[1pc]
+	\begin{turn}{90}
+		\begin{minipage}{2\marginparwidth}
+			\centering
+			\includegraphics[width=1.95\marginparwidth]{figures/sys.pdf}
+			\caption{The system architecture } ~\label{fig:sys}
+		\end{minipage}
+	\end{turn}
+\end{marginfigure}
+
 Improving the bicycle safety is a key issue in human lifetime, and it has been studied by a broad-range of research works. Cyber-Physical bicycle \cite{Bib:imp2010} performs automated rear-approaching vehicle detection via video and audio sensors. LightLane \cite{bib:Lig2014} highlights a bike path around a bicycle on the roadway by projecting an image, reminding the motorists to keep a safe passing distance. However, these works require professional hardware supports.  BikeNet \cite{Bib:Bik2009} constructs a mobile sensing platform on a bicycle to gather the riding data and the environmental data. \sysname takes one step further of this work,  providing a pervasive and efficient system to monitor the bicyclist riding behaviors with smartphones. It evokes the embedded accelerometers and gyrometers of smartphones to monitor the cyclists' movements and employs the GPS to track their riding directions, which infers the two common and dangerous riding actions (\ie the frequent lane weaving and standing riding) and detects the wrong-way riding.  
 Compared with previous works, \sysname gets rid of the professional hardware equipments, and provides an real-time alarm when the cyclists run in an illegal bike way. 
 
 The key challenges are from two sides. 1) How to identify discriminative behaviors of the riders from noisy environmental data. 2) How to determine the legal riding directions of cycleways without knowledges.   
 To copy with this issue, we design specific feature-extraction mechanism for each kind of data, and construct a crowdsourcing platform to learn the legal riding direction of cycleways. 
-\sysname has been evaluated on eight users over two weeks. The experimental results show that the detection accuracy of three type of behaviors are all over XX\%, while its energy cost keeps below XX\% per hours, which is satisfied with the practical operation in daily life.  
-
-\begin{figure}
-  \includegraphics[width=0.9\columnwidth]{figures/sys.pdf}
-  \caption{The system architecture.}~\label{fig:sys}
-\end{figure}
+\sysname has been evaluated on eight users over two weeks. The experimental results show that the detection accuracy of three type of behaviors are all over 80\%, while its energy cost keeps around 5\% per 10 minutes, which is satisfied with the practical operation in daily life.  
 
 
-%\begin{marginfigure}[1pc]
-%  \begin{minipage}{\marginparwidth}
-%    \centering
-%    \includegraphics[width=0.9\marginparwidth]{figures/gps_workflow.pdf}
-%    \caption{In ~\label{fig:marginfig}
-%  \end{minipage}
-%\end{marginfigure}
+
+
+
 
 
 \section{ System Overview}
@@ -166,26 +169,9 @@ As the smartphone is worn with the riders while they are riding, the cyclists' b
 The two kinds of sensory data are uploaded to the data analysis layer for the riding event detection.
 \subparagraph{Data analysis layer} 
 
-\begin{table}[h]
-	\centering
-	\caption{Selected Features of Riding Bicycle}
-	\label{feature_table}
-	\begin{threeparttable}
-		\begin{tabular}{|l|l|}
-			\hline
-			\textbf{Feature}               & \textbf{Expression} \\ \hline
-			Average Magnitude              &      $\sum_{j=1}^{N}a_{j}$              \\ \hline
-			Standard Deviation             &      $\sqrt{\frac{1}{N}\sum_{j=1}^{N}(a_{j}-\mu )}$  \\ \hline
-			Average Absolute Difference    &      $\frac{1}{N}\sum_{j=1}^{N}\left |a_{j}-\mu   \right |$\\ \hline
-			Average Resultant Acceleration &      $\frac{1}{N}\sum_{j=1}^{N}\left |a_{xj}^2+a_{yj}^2+a_{zj}^2 \right |$   \\  \hline
-			Binned Distribution            &      $\sum_{i=1}^{K}\sum_{j=1}^{N}sign\left [a_{j}-a_{min}+\frac{(i-1)}{M}(a_{max}-a_{min})\right ]\left [a_{min}+\frac{i}{M}(a_{max}-a_{min}) -a_j \right ]$              \\ \hline
-		\end{tabular}
-		\begin{tablenotes}
-			\footnotesize
-			\item[1] $a_{xj}$, $a_{yj}$ and $a_{zj}$ are the $j$th sample of three axes of the accelerometer in the sliding window. $a_{j}$ is the average square root of $a_{xj}$, $a_{yj}$ and $a_{zj}$. $a_{max}$, $a_{min}$ and $\mu$ are the maximum, minimum and the average value in the sliding window.  $N$ is the length of the sliding window. 
-		\end{tablenotes}
-	\end{threeparttable}
-\end{table}
+
+
+
 
 
 Riding movement detection and riding route management are two function modules in this layer. 
@@ -193,43 +179,97 @@ Riding movement detection and riding route management are two function modules i
 In \textit{movement detection module}, \sysname divides the riding behavior by three events: 1) frequent Lane weaving: weaving or swaying across the lane more than two times/minute;  2) Stand riding: the rider standing on the pedal to ride and 3) Normal riding. 
 Lane weaving and stand riding are regards as two dangerous cases when the cyclists are riding on the road, which easily result to the cyclists loss their balance.
 Intuitively, the acceleration and angular acceleration traces are exhibited distinct patterns on the three kinds of riding actions. The frequent sways during the lane weaving amplitude the force of the left and right sides, and thus improve the magnitude of angular acceleration directly. For the standing riding, the movements of cyclist's legs are greater than those of standard riding, which result in the higher of acceleration magnitude.
-The distinct acceleration patterns of the three movements in Fig. \ref{fig:acc} demonstrate this point. The amplitude of the angular acceleration of lane weaving and the acceleration of the standing riding  are significantly larger than those of standard riding.  Accordingly, \sysname enables to predict the three riding movements by the acceleration features in Table~\ref{feature_table}. Considering the temporal-dependent in the acceleration pattern, we adopted Hidden Markov Model (HMM) for events classification.
-\begin{figure}[h]
-	\includegraphics[width=0.9\columnwidth]{figures/acc.pdf}
-	\caption{The angular acceleration and acceleration samples.}~\label{fig:acc}
-\end{figure}
+The distinct acceleration patterns of the three movements in Fig. \ref{fig:acc} demonstrate this point. The amplitude of the angular acceleration of lane weaving and the acceleration of the standing riding  are significantly larger than those of standard riding.  Accordingly, \sysname enables to predict the three riding movements by the acceleration features:
+1) Average Magnitude:  $\sum_{j=1}^{N}a_{j}$;
+2) Standard Deviation:  $\sqrt{\frac{1}{N}\sum_{j=1}^{N}(a_{j}-\mu )}$;
+3) Average Absolute Difference:  $\frac{1}{N}\sum_{j=1}^{N}\left |a_{j}-\mu   \right |$;
+4) Binned Distribution: $\sum_{i=1}^{K}\sum_{j=1}^{N} sign\left [a_{j}-a_{min}+\frac{(i-1)}{M}(a_{max}-a_{min})\right ]\\\left [a_{min}+\frac{i}{M}(a_{max}-a_{min}) -a_j \right ]$.
+
+Considering the temporal-dependent in the acceleration pattern, we adopted Hidden Markov Model (HMM) for events classification.
+
 
 In \textit{wrong-way riding detection module}, \sysname aims to detect whether the user rides against the legal directions of the route.
 Fig.~\ref{fig:gps_workflow} illustrates the work flow of the wrong-way riding detection. 
 
-\begin{figure}[h]
-	\includegraphics[width=0.7\columnwidth]{figures/gps_workflow.pdf}
-	\caption{The angular acceleration and acceleration samples.}~\label{fig:gps_workflow}
-\end{figure}
-%
-\sysname first conducts the GPS data process. Since GPS samples are easily influenced by the environment, \sysname eliminates its noise by removing the GPS samples whose error radius are larger than 20 meters, and adopts the Weighted Moving Average (WMA) to smooth the them.  Fig.~\ref{fig:gps_trace} illustrates the effects of noise elimination on the GPS traces
+\begin{marginfigure}[-42pc]
+	\begin{turn}{90}
+		\begin{minipage}{2\marginparwidth}
+			\centering
+			\includegraphics[width=1.7\marginparwidth]{figures/acc.pdf}
+			\caption{The angular acceleration and acceleration samples. } ~\label{fig:acc}
+		\end{minipage}
+	\end{turn}
+\end{marginfigure}
+
+
+\begin{marginfigure}[-10 pc]
+	\begin{minipage}{1\marginparwidth}
+		\centering
+		\includegraphics[width=0.9 \marginparwidth]{figures/gps_workflow.pdf}
+		\caption{The workflow of the wrong-way riding detection. } ~\label{fig:gps_workflow}
+	\end{minipage}
+\end{marginfigure}
+
+\sysname first conducts the GPS data process. Since GPS samples are easily influenced by the environment, \sysname eliminates its noise by removing the GPS samples whose error radius are larger than 20 meters, and adopts the Weighted Moving Average (WMA) to smooth the them.  Fig.~\ref{fig:gps_trace} illustrates the effects of noise elimination on the GPS traces. Two grouped GPS traces are clustered apparently, which indicate two cycleways. 
+
+%\begin{marginfigure}[1 pc]
+%	\begin{turn}{90}
+%	\begin{minipage}{1\marginparwidth}
+%		\centering
+%		\includegraphics[width=0.9 \marginparwidth]{figures/GPS_trace1.pdf}
+%		\caption{The workflow of the wrong-way riding detection. } ~\label{fig:gps_workflow}
+%	\end{minipage}
+%	\end{turn}
+%\end{marginfigure}
+
 
 \begin{figure}[h]
-	\includegraphics[width=0.9\columnwidth]{figures/GPS_trace.pdf}
+	\includegraphics[width=1\columnwidth]{figures/GPS_trace1.pdf}
 	\caption{The GPS traces before and after noise elimination.}~\label{fig:gps_trace}
 \end{figure}
-%
-Afterwards, \sysname delivers the GPS traces to the server and match it with the GPS trajectories in the server by Dynamic Time Warping (DTW). If matched, \sysname determines the cyclist's current position and then compares his/her riding direction with the legal direction of the cycleway.  \sysname computes a cyclist's riding direction by partitioning his GPS trajectory into disjointed segments. Assuming a GPS segment with a start co-ordinate ($X_{1}$, $Y_{1}$) and a end co-ordinate ($X_{2}$, $Y_{2}$), the riding direction $\tau$ of the cyclist is computed as $\tau=arctan(\frac{Y_{2}-Y_{1}}{X_{2}-X_{1}})$
+
+Afterwards, \sysname delivers the GPS traces to the server and match it with the GPS trajectories in the server by Dynamic Time Warping (DTW). If matched, \sysname determines the cyclist's current position and then compares his/her riding direction with the legal direction of the cycleway.  \sysname computes a cyclist's riding direction by partitioning his GPS trajectory into disjointed segments. Assuming a GPS segment with a start co-ordinate ($X_{1}$, $Y_{1}$) and a end co-ordinate ($X_{2}$, $Y_{2}$), the riding direction $\tau$ of the cyclist is computed as $\tau=arctan(\frac{Y_{2}-Y_{1}}{X_{2}-X_{1}})$.  The two red arrows in Fig.~\ref{fig:gps_trace} show the legal directions which calculated by the methods above.  
 If unmatched, \sysname regards this GPS trace as a new route candidates in the database. A new route is generated after more than there are three route candidates with less distance than preset threshold. A cycleway is calculated as the centerline of these candidates, and its legal distance is also consistent with the three candidate routes, which is calculated as above.  
-%
+%%
+
+
 
 \subparagraph{Application layer}
 The application layer reminds the users of their dangerous riding events from the data analysis layer. When the dangerous events or circumstances detected by the system, \sysname delivers vibration and sound to remind users, and thus reduce the occurrence of the accidents. 
 
+%\begin{margintable}[10pc]
+%	\begin{minipage}{\marginparwidth}
+%		\centering
+%		\begin{tabular}{r l}
+%			{\small \textbf{Feature}}
+%			& {\small \textbf{Expression}} \\
+%			\toprule
+%			\small{AM} & \small{$\sum_{j=1}^{N}a_{j}$} \\
+%			\small{SD} & \small{$\sqrt{\frac{1}{N}\sum_{j=1}^{N}(a_{j}-\mu)}$} \\
+%			\small{AR} &\small{$\frac{1}{N}\sum_{j=1}^{N}\left |a_{xj}^2+a_{yj}^2+a_{zj}^2 \right |$} \\
+%			\small{BD}   &  \small{$\sum_{i=1}^{K}\sum_{j=1}^{N}sign\left [a_{j}-a_{min}+\frac{(i-1)}{M}(a_{max}-a_{min})\right ]\left [a_{min}+\frac{i}{M}(a_{max}-a_{min}) -a_j \right ]$}  \\
+%			\bottomrule
+%		\end{tabular}
+%		\caption{Selected Features of Riding Bicycle.} ~\label{tab:table2}
+%	\end{minipage}
+%\end{margintable}
+
 \section{Preliminary Evaluation}
 We test \sysname from the performance of the riding events detection and the performance of the energy consumption. A total of 12 volunteers participants in our experiments, and each of them wears the smartphones on their trousers while they are riding according to our requirement. We manually label their behaviors. Fig.~\ref{fig:experiment_riding} illustrates the experiment scenarios. 
 
-\begin{figure}[h]
-	\includegraphics[width=1\columnwidth]{figures/experiment_riding.pdf}
-	\caption{The GPS traces before and after noise elimination.}~\label{fig:experiment_riding}
-\end{figure}
+
+
+
+\begin{marginfigure}[0 pc]
+	\begin{minipage}{1\marginparwidth}
+		\centering
+		\includegraphics[width=0.6\marginparwidth]{figures/experiment_riding1.pdf}
+		\caption{The experiments. } ~\label{fig:experiment_riding}
+	\end{minipage}
+\end{marginfigure}
+
 \subsection{Performance of riding event detection}
-Table~\ref{confusion_matrix} shows the  prediction confusion matrix of riding movement. As shown, most of the riding movements are predicted correctly.     
+Table~\ref{confusion_matrix} shows the  prediction confusion matrix of riding movement: Normal Riding; Stand Riding; Lane Weaving Riding. As shown, the inference accuracy of each riding movement is higher than 80\%, demonstrating the efficiency of our system.     
 
 \begin{table}[h]
 	\centering
@@ -238,32 +278,58 @@ Table~\ref{confusion_matrix} shows the  prediction confusion matrix of riding mo
 	\begin{tabular}{|c|c|c|c|}
 		\hline
 		\multirow{2}{*}{\textbf{\begin{tabular}[c]{@{}c@{}}Ground\\ Truth\end{tabular}}} & \multicolumn{3}{l|}{\textbf{Inference}}                                                                           \\ \cline{2-4} 
-		& \multicolumn{1}{l|}{Normal Riding} & \multicolumn{1}{l|}{Stand Riding} & \multicolumn{1}{l|}{Lane Weaving Riding} \\ \hline
-		Normal Riding                                                                    & 84.1\%                             & 7.9\%                             & 6.9\%                                    \\ \hline
-		Stand Riding                                                                     & 5.6\%                              & 87.8\%                            & 4.7\%                                    \\ \hline
-		Lane Weaving Riding                                                              & 10.3\%                             & 4.3\%                             & 88.4\%                                   \\ \hline
+		& \multicolumn{1}{l|}{ Normal } & \multicolumn{1}{l|}{ Stand } & \multicolumn{1}{l|}{Lane Weaving} \\ \hline
+		Normal                                                                    & \cellcolor[gray]{0.8}84.1\%                             & 7.9\%                             & 6.9\%                                    \\ \hline
+		Stand                                                                     & 5.6\%                              & \cellcolor[gray]{0.8}87.8\%                            & 4.7\%                                    \\ \hline
+		Lane Weaving                                                              & 10.3\%                             & 4.3\%                             & \cellcolor[gray]{0.8}88.4\%                                   \\ \hline
 	\end{tabular}
 \end{table}
 
+
+
+\begin{margintable}[3pc]
+	\small
+	\begin{minipage}{\marginparwidth}
+		\centering
+		\begin{tabular}{|c|c|c|}
+			\hline
+			\multirow{2}{*}{\textbf{Condition}} & \multicolumn{2}{c|}{\textbf{Test}}                            \\ \cline{2-3} 
+			& \multicolumn{1}{l|}{Positive} & \multicolumn{1}{l|}{Negative} \\ \hline
+			True                             & 93.2\%                        & 6.8\%                         \\ \hline
+			False                              & 13.3\%                        & 86.7\%                        \\ \hline
+		\end{tabular}
+		\caption{The performance of wrong-way riding direction detection.}~\label{wrong_way_riding}
+	\end{minipage}
+\end{margintable}
 \subsection{Performance of wrong-way riding direction detection}
-Table~\ref{tab:wrong_way_riding} illustrates the performance of wrong-way riding direction detection. We compare the user's riding direction with the legal cycling direction of trajectories stored in the database.  
+Table~\ref{wrong_way_riding} illustrates the performance of wrong-way riding direction detection. 
+We compare the user's riding direction with the legal cycling direction of trajectories stored in the database.  
 As shown, the rate of true negative are higher than 90 \%, demonstrating that \sysname can discover most wrong-way riding cases. Meanwhile, less than 15 \% false positive rate shows the legal riding behavior is rarely misclassified as the wrong-way riding.  
 
-\begin{table}[h]
-	\centering
-	\caption{The performance of wrong-way riding direction detection}
-	\label{tab:wrong_way_riding}
-	\begin{tabular}{|c|c|c|}
-		\hline
-		\multirow{2}{*}{\textbf{Condition}} & \multicolumn{2}{c|}{\textbf{Test}}                            \\ \cline{2-3} 
-		& \multicolumn{1}{l|}{Positive} & \multicolumn{1}{l|}{Negative} \\ \hline
-		True                             & 93.2\%                        & 6.8\%                         \\ \hline
-		False                              & 13.3\%                        & 86.7\%                        \\ \hline
-	\end{tabular}
-\end{table}
+%\begin{table}[h]
+%	\centering
+%	\caption{The performance of wrong-way riding direction detection}
+%	\label{tab:wrong_way_riding}
+%	\begin{tabular}{|c|c|c|}
+%		\hline
+%		\multirow{2}{*}{\textbf{Condition}} & \multicolumn{2}{c|}{\textbf{Test}}                            \\ \cline{2-3} 
+%		& \multicolumn{1}{l|}{Positive} & \multicolumn{1}{l|}{Negative} \\ \hline
+%		True                             & 93.2\%                        & 6.8\%                         \\ \hline
+%		False                              & 13.3\%                        & 86.7\%                        \\ \hline
+%	\end{tabular}
+%\end{table}
+
+
 
 \subsection{Performance of energy consumption}
-As power consumption is a practical issue in the daily operation on smartphones. We also test the energy cost of \sysname, and illustrate the results in Fig.~\ref{}.
+As power consumption is a practical issue in the daily operation on smartphones. We also test the energy cost of \sysname on three smartphones by a power tracker, and illustrate the results in Fig.~\ref{fig:battery}.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.6\columnwidth]{figures/battery.pdf}
+	\caption{The GPS traces before and after noise elimination.}~\label{fig:battery}
+\end{figure}
+As we can see, \sysname consumes around 5\% per energy 10 minutes, which is acceptable for daily use.
+The main cost of \sysname comes from the running of GPS. We will optimize it in our future work.
 
 \section{Conclusion}
 Guaranteeing the bicyclist safety and keeping unexpected bike accident rate low is of great important. In this paper, we propose \sysname, a wearable and efficient mobile system to track the riding behaviors. It utilizes the embedded sensors of smartphone to monitor the dangerous riding actions and check whether the cyclist goes a wrong-side. Experimental results of 12 participants demonstrate our system is practical in daily life. 
@@ -394,7 +460,7 @@ Guaranteeing the bicyclist safety and keeping unexpected bike accident rate low 
 %%     it.}\label{fig:bats}
 %% \end{figure}
 %
-%\begin{marginfigure}[-35pc]
+%\begin{marginfigure}[10pc]
 %  \begin{minipage}{\marginparwidth}
 %    \centering
 %    \includegraphics[width=0.9\marginparwidth]{figures/cats}
@@ -407,7 +473,7 @@ Guaranteeing the bicyclist safety and keeping unexpected bike accident rate low 
 %
 %\section{Figures}
 %The examples on this and following pages should help you get a feel
-%for how screen-shots and other figures should be placed in the
+%for how screen-shTSZZTUUots and other figures should be placed in the
 %template. Your document may use color figures (see
 %Figures~\ref{fig:sample}), which are included in the page limit; the
 %figures must be usable when printed in black and white. You can use
